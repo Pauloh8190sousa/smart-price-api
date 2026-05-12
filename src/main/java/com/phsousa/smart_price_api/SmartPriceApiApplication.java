@@ -1,5 +1,6 @@
 package com.phsousa.smart_price_api;
 
+import com.phsousa.smart_price_api.entity.ProductPrice;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
