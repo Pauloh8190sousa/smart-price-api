@@ -1,7 +1,6 @@
 package com.phsousa.smart_price_api.security;
 
 import com.phsousa.smart_price_api.config.HttpLoggingFilter;
-import com.phsousa.smart_price_api.exception.CustomAccessDeniedHandler;
 import com.phsousa.smart_price_api.exception.CustomAuthenticationEntryPoint;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -22,7 +21,6 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(
             HttpSecurity http,
-            CustomAccessDeniedHandler accessDeniedHandler,
             CustomAuthenticationEntryPoint authenticationEntryPoint,
             HttpLoggingFilter httpLoggingFilter
     ) throws Exception {
@@ -54,8 +52,7 @@ public class SecurityConfig {
                 )
 
                 .exceptionHandling(ex -> ex
-                        .accessDeniedHandler(accessDeniedHandler)
-                        .authenticationEntryPoint(authenticationEntryPoint)
+                        .authenticationEntryPoint(authenticationEntryPoint) // 401
                 );
 
         return http.build();
