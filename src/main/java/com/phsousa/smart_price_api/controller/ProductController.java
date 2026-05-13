@@ -8,6 +8,7 @@ import com.phsousa.smart_price_api.service.ProductService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -22,6 +23,7 @@ public class ProductController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
+    @PreAuthorize("hasAuthority('PRODUCT_WRITE')")
     public ProductResponseDTO create(
             @Valid @RequestBody ProductRequestDTO request
     ) {
@@ -34,6 +36,7 @@ public class ProductController {
     }
 
     @GetMapping
+    @PreAuthorize("hasAuthority('PRODUCT_READ')")
     public List<ProductResponseDTO> findAll() {
 
         return productService.findAll()
@@ -43,6 +46,7 @@ public class ProductController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasAuthority('PRODUCT_READ')")
     public ProductResponseDTO findById(
             @PathVariable UUID id
     ) {
@@ -53,6 +57,7 @@ public class ProductController {
     }
 
     @GetMapping("/slug/{slug}")
+    @PreAuthorize("hasAuthority('PRODUCT_READ')")
     public ProductResponseDTO findBySlug(
             @PathVariable String slug
     ) {
@@ -63,6 +68,7 @@ public class ProductController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAuthority('PRODUCT_WRITE')")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(
             @PathVariable UUID id

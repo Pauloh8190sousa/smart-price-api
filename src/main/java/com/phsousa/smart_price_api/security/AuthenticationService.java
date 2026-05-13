@@ -4,15 +4,20 @@ package com.phsousa.smart_price_api.security;
 import com.phsousa.smart_price_api.dto.request.LoginRequestDTO;
 import com.phsousa.smart_price_api.dto.request.RegisterRequestDTO;
 import com.phsousa.smart_price_api.dto.response.AuthResponseDTO;
+import com.phsousa.smart_price_api.dto.response.RoleResponseDTO;
 import com.phsousa.smart_price_api.dto.response.UserResponseDTO;
 import com.phsousa.smart_price_api.entity.Role;
 import com.phsousa.smart_price_api.entity.User;
+import com.phsousa.smart_price_api.repository.RoleRepository;
 import com.phsousa.smart_price_api.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -22,14 +27,18 @@ public class AuthenticationService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
+    private final RoleRepository  roleRepository;
 
     public UserResponseDTO register(RegisterRequestDTO request) {
+
+        Role role = roleRepository.findByName("ROLE_USER")
+                .orElseThrow();
 
         User user = User.builder()
                 .name(request.getName())
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
-                .role(Role.ROLE_USER)
+                .roles(Set.of(role))
                 .active(true)
                 .build();
 
@@ -39,7 +48,15 @@ public class AuthenticationService {
                 .id(savedUser.getId())
                 .name(savedUser.getName())
                 .email(savedUser.getEmail())
-                .role(savedUser.getRole())
+                .roles(
+                        savedUser.getRoles()
+                                .stream()
+                                .map(roleEntity -> RoleResponseDTO.builder()
+                                        .name(roleEntity.getName())
+                                        .build()
+                                )
+                                .collect(Collectors.toSet())
+                )
                 .build();
     }
 
@@ -52,10 +69,10 @@ public class AuthenticationService {
                 )
         );
 
-        User user = userRepository.findByEmail(request.getEmail())
+        User user = userRepository.findByEmailWithRolesAndPermissions(request.getEmail())
                 .orElseThrow();
 
-        String token = jwtService.generateToken(user.getEmail());
+        String token = jwtService.generateToken(user);
 
         return new AuthResponseDTO(token);
     }

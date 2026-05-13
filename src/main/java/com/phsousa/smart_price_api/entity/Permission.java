@@ -3,17 +3,16 @@ package com.phsousa.smart_price_api.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.Set;
 import java.util.UUID;
 
 @Entity
-@Table(name = "T_ROLE")
+@Table(name = "T_PERMISSION")
 @Getter
 @Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Role {
+public class Permission {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -21,12 +20,4 @@ public class Role {
 
     @Column(length = 100, nullable = false, unique = true)
     private String name;
-
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(
-            name = "T_ROLE_PERMISSION",
-            joinColumns = @JoinColumn(name = "role_id"),
-            inverseJoinColumns = @JoinColumn(name = "permission_id")
-    )
-    private Set<Permission> permissions;
 }
