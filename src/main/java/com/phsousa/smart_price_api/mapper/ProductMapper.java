@@ -20,17 +20,17 @@ public class ProductMapper {
 
     public static ProductResponseDTO toDTO(Product product) {
 
-        return ProductResponseDTO.builder()
-                .id(product.getId())
-                .name(product.getName())
-                .slug(product.getSlug())
-                .brand(product.getBrand())
-                .model(product.getModel())
-                .category(product.getCategory())
-                .imageUrl(product.getImageUrl())
-                .description(product.getDescription())
-                .active(product.getActive())
-                .createdAt(product.getCreatedAt())
-                .build();
+        return new ProductResponseDTO(
+                product.getId(),
+                product.getName(),
+                product.getSlug(),
+                product.getBrand(),
+                product.getModel(),
+                product.getCategory(),
+                product.getImageUrl(),
+                product.getDescription(),
+                product.getActive(),
+                product.getCreatedAt()
+        );
     }
 }

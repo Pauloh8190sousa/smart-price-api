@@ -1,5 +1,6 @@
 package com.phsousa.smart_price_api.security;
 
+import com.phsousa.smart_price_api.entity.Role;
 import com.phsousa.smart_price_api.entity.User;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
@@ -26,9 +27,10 @@ public class JwtService {
     }
 
     public String generateToken(User user) {
-
         return Jwts.builder()
                 .subject(user.getEmail())
+                // info útil (não obrigatória para auth)
+                .claim("userId", user.getId())
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + expiration))
                 .signWith(getSignKey())

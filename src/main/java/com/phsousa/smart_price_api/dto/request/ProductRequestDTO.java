@@ -16,11 +16,8 @@ public class ProductRequestDTO {
     private String slug;
 
     private String brand;
-
     private String model;
-
     private String category;
-
     private String imageUrl;
 
     @Size(max = 2000)

@@ -1,10 +1,11 @@
 package com.phsousa.smart_price_api.dto.response;
 
-
 import java.util.UUID;
 
-public record UserResponseDTO(
+public record StoreResponseDTO(
         UUID id,
         String name,
-        String email
+        String websiteUrl,
+        String logoUrl,
+        Boolean active
 ) {}

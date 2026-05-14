@@ -17,9 +17,15 @@ public class Store {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
-    private String name;
-    private String websiteUrl;
-    private String logoUrl;
-    private Boolean active;
 
+    @Column(nullable = false)
+    private String name;
+
+    @Column(unique = true)
+    private String websiteUrl;
+
+    private String logoUrl;
+
+    @Builder.Default
+    private Boolean active = true;
 }

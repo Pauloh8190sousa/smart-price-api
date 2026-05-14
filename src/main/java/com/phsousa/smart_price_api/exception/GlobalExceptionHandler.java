@@ -1,6 +1,7 @@
 package com.phsousa.smart_price_api.exception;
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
@@ -65,7 +66,7 @@ public class GlobalExceptionHandler {
                 .timestamp(LocalDateTime.now())
                 .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
                 .error("Internal Server Error")
-                .message(ex.getMessage())
+                .message("Erro interno no servidor")
                 .path(request.getRequestURI())
                 .build();
 
@@ -87,5 +88,22 @@ public class GlobalExceptionHandler {
                         .message("Você não tem permissão para acessar este recurso")
                         .path(request.getRequestURI())
                         .build());
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<StandardError> handleConflict(
+            DataIntegrityViolationException ex,
+            HttpServletRequest request
+    ) {
+
+        StandardError error = StandardError.builder()
+                .timestamp(LocalDateTime.now())
+                .status(HttpStatus.CONFLICT.value())
+                .error("Conflict")
+                .message("Violação de integridade (dados duplicados ou relacionamento inválido)")
+                .path(request.getRequestURI())
+                .build();
+
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
     }
 }

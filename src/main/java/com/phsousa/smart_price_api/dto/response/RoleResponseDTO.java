@@ -1,11 +1,7 @@
 package com.phsousa.smart_price_api.dto.response;
+import java.util.Set;
 
-import lombok.Builder;
-import lombok.Data;
-
-@Data
-@Builder
-public class RoleResponseDTO {
-
-    private String name;
-}
+public record RoleResponseDTO(
+        String name,
+        Set<PermissionResponseDTO> permissions
+) {}

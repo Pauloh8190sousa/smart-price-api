@@ -1,12 +1,10 @@
 package com.phsousa.smart_price_api.dto.response;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
 
-@Data
-@AllArgsConstructor
-public class AuthResponseDTO {
+import java.util.Set;
 
-    private String token;
-
-}
+public record AuthResponseDTO(
+        String token,
+        UserResponseDTO user,
+        Set<RoleResponseDTO> roles
+) {}

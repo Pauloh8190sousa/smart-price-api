@@ -4,6 +4,7 @@ package com.phsousa.smart_price_api.security;
 import com.phsousa.smart_price_api.dto.request.LoginRequestDTO;
 import com.phsousa.smart_price_api.dto.request.RegisterRequestDTO;
 import com.phsousa.smart_price_api.dto.response.AuthResponseDTO;
+import com.phsousa.smart_price_api.dto.response.PermissionResponseDTO;
 import com.phsousa.smart_price_api.dto.response.RoleResponseDTO;
 import com.phsousa.smart_price_api.dto.response.UserResponseDTO;
 import com.phsousa.smart_price_api.entity.Role;
@@ -31,7 +32,7 @@ public class AuthenticationService {
 
     public UserResponseDTO register(RegisterRequestDTO request) {
 
-        Role role = roleRepository.findByName("ROLE_USER")
+        Role role = roleRepository.findByNameWithPermissions("ROLE_USER")
                 .orElseThrow();
 
         User user = User.builder()
@@ -44,20 +45,11 @@ public class AuthenticationService {
 
         User savedUser = userRepository.save(user);
 
-        return UserResponseDTO.builder()
-                .id(savedUser.getId())
-                .name(savedUser.getName())
-                .email(savedUser.getEmail())
-                .roles(
-                        savedUser.getRoles()
-                                .stream()
-                                .map(roleEntity -> RoleResponseDTO.builder()
-                                        .name(roleEntity.getName())
-                                        .build()
-                                )
-                                .collect(Collectors.toSet())
-                )
-                .build();
+        return new UserResponseDTO(
+                savedUser.getId(),
+                savedUser.getName(),
+                savedUser.getEmail()
+        );
     }
 
     public AuthResponseDTO login(LoginRequestDTO request) {
@@ -69,11 +61,35 @@ public class AuthenticationService {
                 )
         );
 
-        User user = userRepository.findByEmailWithRolesAndPermissions(request.getEmail())
-                .orElseThrow();
+        User user = userRepository.findByEmailWithRolesAndPermissions(
+                request.getEmail()
+        ).orElseThrow();
 
         String token = jwtService.generateToken(user);
 
-        return new AuthResponseDTO(token);
+        UserResponseDTO userDTO = new UserResponseDTO(
+                user.getId(),
+                user.getName(),
+                user.getEmail()
+        );
+
+        Set<RoleResponseDTO> roles = user.getRoles()
+                .stream()
+                .map(role -> new RoleResponseDTO(
+                        role.getName(),
+                        role.getPermissions()
+                                .stream()
+                                .map(permission ->
+                                        new PermissionResponseDTO(permission.getName())
+                                )
+                                .collect(Collectors.toSet())
+                ))
+                .collect(Collectors.toSet());
+
+        return new AuthResponseDTO(
+                token,
+                userDTO,
+                roles
+        );
     }
 }

@@ -51,12 +51,12 @@ public class HttpLoggingFilter extends OncePerRequestFilter {
             );
 
             requestBody = requestBody.replaceAll(
-                    "\"password\":\"(.*?)\"",
+                    "\"password\"\\s*:\\s*\"(.*?)\"",
                     "\"password\":\"***\""
             );
 
             responseBody = responseBody.replaceAll(
-                    "\"token\":\"(.*?)\"",
+                    "\"token\"\\s*:\\s*\"(.*?)\"",
                     "\"token\":\"***\""
             );
 
