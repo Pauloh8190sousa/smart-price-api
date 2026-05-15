@@ -1,12 +1,13 @@
 package com.phsousa.smart_price_api.util;
 
-import io.jsonwebtoken.Jwts;
-
-import javax.crypto.SecretKey;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import java.util.Scanner;
 
 public class GenerateKey {
 
     public static void main(String[] args) {
+        /*
+        ---> Gera SecretKey para o JWT
 
         SecretKey key = Jwts.SIG.HS256.key().build();
 
@@ -15,5 +16,22 @@ public class GenerateKey {
                 .encodeToString(key.getEncoded());
 
         System.out.println(base64Key);
+
+        <---
+        */
+
+
+        // ---> Gera senha do user para o banco
+        Scanner scanner = new Scanner(System.in);
+        System.out.print("Digite a sua senha: ");
+        String password = scanner.nextLine();
+
+
+        BCryptPasswordEncoder encoder =
+                new BCryptPasswordEncoder();
+
+        System.out.println(
+                encoder.encode(password)
+        );
     }
 }

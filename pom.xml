@@ -11,8 +11,8 @@
 	<groupId>com.phsousa</groupId>
 	<artifactId>smart-price-api</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name/>
-	<description/>
+	<name>smart-price-api</name>
+	<description>API para monitoramento e comparação de preços</description>
 	<url/>
 	<licenses>
 		<license/>
@@ -116,6 +116,14 @@
 	</dependencies>
 
 	<build>
+
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+				<filtering>true</filtering>
+			</resource>
+		</resources>
+
 		<plugins>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
