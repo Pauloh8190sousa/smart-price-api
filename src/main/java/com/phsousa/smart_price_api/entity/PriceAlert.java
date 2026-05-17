@@ -27,4 +27,11 @@ public class PriceAlert {
     private User user;
     @ManyToOne
     private Product product;
+
+
+    @PrePersist
+    public void prePersist() {
+        createdAt = LocalDateTime.now();
+        active = true;
+    }
 }

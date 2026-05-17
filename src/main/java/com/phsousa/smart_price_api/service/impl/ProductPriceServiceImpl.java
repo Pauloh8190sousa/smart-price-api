@@ -2,18 +2,13 @@ package com.phsousa.smart_price_api.service.impl;
 
 import com.phsousa.smart_price_api.dto.request.ProductPriceRequestDTO;
 import com.phsousa.smart_price_api.dto.response.ProductPriceResponseDTO;
-import com.phsousa.smart_price_api.entity.PriceHistory;
-import com.phsousa.smart_price_api.entity.Product;
-import com.phsousa.smart_price_api.entity.ProductPrice;
-import com.phsousa.smart_price_api.entity.Store;
+import com.phsousa.smart_price_api.entity.*;
 import com.phsousa.smart_price_api.exception.ResourceNotFoundException;
 import com.phsousa.smart_price_api.mapper.ProductPriceMapper;
-import com.phsousa.smart_price_api.repository.PriceHistoryRepository;
-import com.phsousa.smart_price_api.repository.ProductPriceRepository;
-import com.phsousa.smart_price_api.repository.ProductRepository;
-import com.phsousa.smart_price_api.repository.StoreRepository;
+import com.phsousa.smart_price_api.repository.*;
 import com.phsousa.smart_price_api.service.ProductPriceService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -22,12 +17,14 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ProductPriceServiceImpl implements ProductPriceService {
 
     private final ProductPriceRepository productPriceRepository;
     private final ProductRepository productRepository;
     private final StoreRepository storeRepository;
     private final PriceHistoryRepository priceHistoryRepository;
+    private final PriceAlertRepository priceAlertRepository;
 
     @Override
     public ProductPriceResponseDTO create(
@@ -82,6 +79,8 @@ public class ProductPriceServiceImpl implements ProductPriceService {
         ProductPrice saved =
                 productPriceRepository.save(entity);
 
+        processPriceAlerts(saved);
+
         return ProductPriceMapper.toDTO(saved);
     }
 
@@ -120,5 +119,44 @@ public class ProductPriceServiceImpl implements ProductPriceService {
                 .stream()
                 .map(ProductPriceMapper::toDTO)
                 .toList();
+    }
+
+
+
+    private void processPriceAlerts(ProductPrice productPrice) {
+
+        List<PriceAlert> alerts =
+                priceAlertRepository
+                        .findByProductIdAndActiveTrue(
+                                productPrice.getProduct().getId()
+                        );
+
+        for (PriceAlert alert : alerts) {
+
+            boolean reachedTarget =
+                    productPrice.getPrice()
+                            .compareTo(alert.getTargetPrice()) <= 0;
+
+            if (reachedTarget) {
+
+                log.info("""
+                        PRICE ALERT TRIGGERED
+                        
+                        Product: {}
+                        Current Price: {}
+                        Target Price: {}
+                        User: {}
+                        """,
+                        productPrice.getProduct().getName(),
+                        productPrice.getPrice(),
+                        alert.getTargetPrice(),
+                        alert.getUser().getEmail()
+                );
+
+                alert.setActive(false);
+
+                priceAlertRepository.save(alert);
+            }
+        }
     }
 }
