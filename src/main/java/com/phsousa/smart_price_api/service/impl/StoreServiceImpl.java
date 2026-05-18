@@ -1,11 +1,14 @@
 package com.phsousa.smart_price_api.service.impl;
 
+import com.phsousa.smart_price_api.dto.response.StoreResponseDTO;
 import com.phsousa.smart_price_api.entity.Store;
 import com.phsousa.smart_price_api.exception.ResourceNotFoundException;
+import com.phsousa.smart_price_api.mapper.StoreMapper;
 import com.phsousa.smart_price_api.repository.StoreRepository;
 import com.phsousa.smart_price_api.service.StoreService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
@@ -18,31 +21,38 @@ public class StoreServiceImpl implements StoreService {
 
 
     @Override
-    public Store create(Store store) {
-        return storeRepository.save(store);
+    public StoreResponseDTO create(Store store) {
+        return StoreMapper.toDTO(storeRepository.save(store));
     }
 
     @Override
-    public List<Store> findAll() {
-        return storeRepository.findAll();
+    public List<StoreResponseDTO> findAll() {
+        return storeRepository.findAll()
+                .stream()
+                .map(StoreMapper::toDTO)
+                .toList();
     }
 
     @Override
-    public Store findById(UUID id) {
-        return storeRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Store não encontrada"));
+    public StoreResponseDTO findById(UUID id) {
+        Store store = storeRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Loja não encontrada"));
+
+        return StoreMapper.toDTO(store);
     }
 
     @Override
-    public Store update(UUID id, Store updated) {
-        Store store = findById(id);
+    @Transactional
+    public StoreResponseDTO update(UUID id, Store updated) {
+        Store store = storeRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Loja não encontrada"));
 
         store.setName(updated.getName());
         store.setWebsiteUrl(updated.getWebsiteUrl());
         store.setLogoUrl(updated.getLogoUrl());
         store.setActive(updated.getActive());
 
-        return storeRepository.save(store);
+        return StoreMapper.toDTO(storeRepository.save(store));
     }
 
     @Override

@@ -5,6 +5,7 @@ import com.phsousa.smart_price_api.dto.response.PriceAlertResponseDTO;
 import com.phsousa.smart_price_api.entity.PriceAlert;
 import com.phsousa.smart_price_api.entity.Product;
 import com.phsousa.smart_price_api.entity.User;
+import com.phsousa.smart_price_api.exception.ResourceNotFoundException;
 import com.phsousa.smart_price_api.mapper.PriceAlertMapper;
 import com.phsousa.smart_price_api.repository.PriceAlertRepository;
 import com.phsousa.smart_price_api.repository.ProductRepository;
@@ -12,6 +13,7 @@ import com.phsousa.smart_price_api.repository.UserRepository;
 import com.phsousa.smart_price_api.service.PriceAlertService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -29,10 +31,12 @@ public class PriceAlertServiceImpl implements PriceAlertService {
     public PriceAlertResponseDTO create(PriceAlertRequestDTO dto) {
 
         User user = userRepository.findById(dto.getUserId())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Usuário não encontrado"));
 
         Product product = productRepository.findById(dto.getProductId())
-                .orElseThrow(() -> new RuntimeException("Product not found"));
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Produto não encontrado"));
 
         PriceAlert alert = PriceAlert.builder()
                 .targetPrice(dto.getTargetPrice())
@@ -57,14 +61,20 @@ public class PriceAlertServiceImpl implements PriceAlertService {
 
     @Override
     public void delete(UUID id) {
-        repository.deleteById(id);
+        PriceAlert alert = repository.findById(id)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Alerta não encontrado"));
+
+        repository.delete(alert);
     }
 
     @Override
+    @Transactional
     public PriceAlertResponseDTO toggle(UUID id) {
 
         PriceAlert alert = repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Alert not found"));
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Alerta não encontrado"));
 
         alert.setActive(!alert.getActive());
 

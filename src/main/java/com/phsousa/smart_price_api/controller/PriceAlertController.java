@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/price-alerts")
+@RequestMapping("/api/price-alerts")
 @RequiredArgsConstructor
 public class PriceAlertController {
 
@@ -45,12 +45,12 @@ public class PriceAlertController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(
+    public ResponseEntity<String> delete(
             @PathVariable UUID id
     ) {
 
         service.delete(id);
 
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok("Alerta removido com sucesso");
     }
 }

@@ -1,5 +1,6 @@
 package com.phsousa.smart_price_api.service;
 
+import com.phsousa.smart_price_api.dto.response.ProductResponseDTO;
 import com.phsousa.smart_price_api.entity.Product;
 
 import java.util.List;
@@ -7,13 +8,15 @@ import java.util.UUID;
 
 public interface ProductService {
 
-    Product create(Product product);
+    ProductResponseDTO create(Product product);
 
-    List<Product> findAll();
+    List<ProductResponseDTO> findAll();
 
-    Product findById(UUID id);
+    ProductResponseDTO findById(UUID id);
 
     void delete(UUID id);
 
-    Product findBySlug (String slug);
+    ProductResponseDTO findBySlug(String slug);
+
+    ProductResponseDTO update(UUID id, Product updated);
 }

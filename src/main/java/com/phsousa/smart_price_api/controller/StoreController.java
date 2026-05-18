@@ -8,6 +8,7 @@ import com.phsousa.smart_price_api.service.StoreService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,42 +23,38 @@ public class StoreController {
     private final StoreService storeService;
 
     @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("hasAuthority('STORE_WRITE')")
-    public StoreResponseDTO create(@RequestBody @Valid StoreRequestDTO request) {
+    public ResponseEntity<StoreResponseDTO> create(@RequestBody @Valid StoreRequestDTO request) {
         Store store = StoreMapper.toEntity(request);
-        return StoreMapper.toDTO(storeService.create(store));
+        return ResponseEntity.status(HttpStatus.CREATED).body(storeService.create(store));
     }
 
     @GetMapping
     @PreAuthorize("hasAuthority('STORE_READ')")
-    public List<StoreResponseDTO> findAll() {
-        return storeService.findAll()
-                .stream()
-                .map(StoreMapper::toDTO)
-                .toList();
+    public ResponseEntity<List<StoreResponseDTO>> findAll() {
+        return ResponseEntity.ok(storeService.findAll());
     }
 
     @GetMapping("/{id}")
     @PreAuthorize("hasAuthority('STORE_READ')")
-    public StoreResponseDTO findById(@PathVariable UUID id) {
-        return StoreMapper.toDTO(storeService.findById(id));
+    public ResponseEntity<StoreResponseDTO> findById(@PathVariable UUID id) {
+        return ResponseEntity.ok(storeService.findById(id));
     }
 
     @PutMapping("/{id}")
     @PreAuthorize("hasAuthority('STORE_UPDATE')")
-    public StoreResponseDTO update(
+    public ResponseEntity<StoreResponseDTO> update(
             @PathVariable UUID id,
             @RequestBody StoreRequestDTO request
     ) {
         Store updated = StoreMapper.toEntity(request);
-        return StoreMapper.toDTO(storeService.update(id, updated));
+        return ResponseEntity.ok(storeService.update(id, updated));
     }
 
     @DeleteMapping("/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
     @PreAuthorize("hasAuthority('STORE_DELETE')")
-    public void delete(@PathVariable UUID id) {
+    public ResponseEntity<String> delete(@PathVariable UUID id) {
         storeService.delete(id);
+        return ResponseEntity.ok("Store removido com sucesso");
     }
 }

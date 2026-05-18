@@ -30,7 +30,8 @@ public class ProductMapper {
                 product.getImageUrl(),
                 product.getDescription(),
                 product.getActive(),
-                product.getCreatedAt()
+                product.getCreatedAt(),
+                product.getUpdatedAt()
         );
     }
 }

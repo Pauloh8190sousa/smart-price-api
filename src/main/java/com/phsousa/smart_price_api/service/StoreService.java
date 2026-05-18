@@ -1,4 +1,5 @@
 package com.phsousa.smart_price_api.service;
+import com.phsousa.smart_price_api.dto.response.StoreResponseDTO;
 import com.phsousa.smart_price_api.entity.Store;
 
 import java.util.List;
@@ -6,13 +7,13 @@ import java.util.UUID;
 
 public interface StoreService {
 
-    Store create(Store store);
+    StoreResponseDTO create(Store store);
 
-    List<Store> findAll();
+    List<StoreResponseDTO> findAll();
 
-    Store findById(UUID id);
+    StoreResponseDTO findById(UUID id);
 
-    Store update (UUID id, Store updated);
+    StoreResponseDTO update (UUID id, Store updated);
 
     void delete(UUID id);
 

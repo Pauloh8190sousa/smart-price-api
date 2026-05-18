@@ -2,30 +2,12 @@ spring:
   application:
     name: smart-price-api
 
+  profiles:
+    active: dev
+
   flyway:
     enabled: true
     locations: classpath:db/migration
-
-  # Banco de dados
-  datasource:
-    url: jdbc:postgresql://localhost:5432/smart-price-db
-    username: postgres
-    password: postgres
-
-  jpa:
-    open-in-view: false
-    hibernate:
-      ddl-auto: update
-
-    show-sql: false # Usar somente para desenvolvimento e verificar consultas, insert, update, create e delete feitas pelo hibernate
-
-    properties:
-      hibernate:
-        format_sql: true
-
-jwt:
-  secret: PAyuZTfRVkW08535niRZiWheMTlUu4+SvNRKgS54Eu8=
-  expiration: 86400000
 
 server:
   port: 8080
