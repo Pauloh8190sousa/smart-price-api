@@ -10,12 +10,13 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(ResourceNotFoundException.class)
-    public ResponseEntity<StandardError> handleResourceNotFound(
+    public ResponseEntity<StandardError> handleNotFound(
             ResourceNotFoundException ex,
             HttpServletRequest request
     ) {
@@ -23,7 +24,7 @@ public class GlobalExceptionHandler {
         StandardError error = StandardError.builder()
                 .timestamp(LocalDateTime.now())
                 .status(HttpStatus.NOT_FOUND.value())
-                .error("Resource Not Found")
+                .error(HttpStatus.NOT_FOUND.getReasonPhrase())
                 .message(ex.getMessage())
                 .path(request.getRequestURI())
                 .build();
@@ -34,60 +35,51 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<StandardError> handleValidationException(
+    public ResponseEntity<StandardError> handleValidation(
             MethodArgumentNotValidException ex,
             HttpServletRequest request
     ) {
 
-        String message = ex.getBindingResult()
-                .getFieldError()
-                .getDefaultMessage();
+        List<ValidationFieldError> fields = ex.getBindingResult()
+                .getFieldErrors()
+                .stream()
+                .map(error -> new ValidationFieldError(
+                        error.getField(),
+                        error.getDefaultMessage()
+                ))
+                .toList();
 
         StandardError error = StandardError.builder()
                 .timestamp(LocalDateTime.now())
                 .status(HttpStatus.BAD_REQUEST.value())
-                .error("Validation Error")
-                .message(message)
+                .error(HttpStatus.BAD_REQUEST.getReasonPhrase())
+                .message("Dados inválidos")
                 .path(request.getRequestURI())
+                .fields(fields)
                 .build();
 
         return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
+                .badRequest()
                 .body(error);
     }
 
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<StandardError> handleGenericException(
-            Exception ex,
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<StandardError> handleAccessDenied(
+            AccessDeniedException ex,
             HttpServletRequest request
     ) {
 
         StandardError error = StandardError.builder()
                 .timestamp(LocalDateTime.now())
-                .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
-                .error("Internal Server Error")
-                .message("Erro interno no servidor")
+                .status(HttpStatus.FORBIDDEN.value())
+                .error(HttpStatus.FORBIDDEN.getReasonPhrase())
+                .message("Você não possui permissão para acessar este recurso")
                 .path(request.getRequestURI())
                 .build();
 
         return ResponseEntity
-                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .status(HttpStatus.FORBIDDEN)
                 .body(error);
-    }
-
-    @ExceptionHandler(org.springframework.security.access.AccessDeniedException.class)
-    public ResponseEntity<StandardError> handleAccessDenied(
-            AccessDeniedException ex,
-            HttpServletRequest request
-    ) {
-        return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                .body(StandardError.builder()
-                        .timestamp(LocalDateTime.now())
-                        .status(403)
-                        .error("Forbidden")
-                        .message("Você não tem permissão para acessar este recurso")
-                        .path(request.getRequestURI())
-                        .build());
     }
 
     @ExceptionHandler(DataIntegrityViolationException.class)
@@ -99,11 +91,32 @@ public class GlobalExceptionHandler {
         StandardError error = StandardError.builder()
                 .timestamp(LocalDateTime.now())
                 .status(HttpStatus.CONFLICT.value())
-                .error("Conflict")
-                .message("Violação de integridade (dados duplicados ou relacionamento inválido)")
+                .error(HttpStatus.CONFLICT.getReasonPhrase())
+                .message("Operação não permitida devido à integridade dos dados")
                 .path(request.getRequestURI())
                 .build();
 
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .body(error);
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<StandardError> handleGeneric(
+            Exception ex,
+            HttpServletRequest request
+    ) {
+
+        StandardError error = StandardError.builder()
+                .timestamp(LocalDateTime.now())
+                .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                .error(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase())
+                .message("Erro interno inesperado")
+                .path(request.getRequestURI())
+                .build();
+
+        return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(error);
     }
 }

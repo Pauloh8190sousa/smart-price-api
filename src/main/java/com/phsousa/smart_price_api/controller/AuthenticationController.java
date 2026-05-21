@@ -5,6 +5,7 @@ import com.phsousa.smart_price_api.dto.response.AuthResponseDTO;
 import com.phsousa.smart_price_api.dto.response.UserResponseDTO;
 import com.phsousa.smart_price_api.security.AuthenticationService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -22,7 +23,7 @@ public class AuthenticationController {
     public ResponseEntity<UserResponseDTO> register(
             @RequestBody RegisterRequestDTO request
     ) {
-        return ResponseEntity.ok(authenticationService.register(request));
+        return ResponseEntity.status(HttpStatus.CREATED).body(authenticationService.register(request));
     }
 
     @PostMapping("/login")

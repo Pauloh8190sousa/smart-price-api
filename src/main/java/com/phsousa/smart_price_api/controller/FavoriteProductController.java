@@ -8,6 +8,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -25,6 +26,7 @@ public class FavoriteProductController {
     private final FavoriteProductService service;
 
     @PostMapping
+    @PreAuthorize("hasAuthority('PRODUCT_WRITE')")
     public ResponseEntity<FavoriteProductResponseDTO> create(
             @RequestBody @Valid FavoriteProductRequestDTO dto
     ) {
@@ -34,6 +36,7 @@ public class FavoriteProductController {
     }
 
     @GetMapping("/user/{userId}")
+    @PreAuthorize("hasAuthority('PRODUCT_READ')")
     public ResponseEntity<List<FavoriteProductResponseDTO>>
     findByUser(
             @PathVariable UUID userId
@@ -45,6 +48,7 @@ public class FavoriteProductController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAuthority('PRODUCT_DELETE')")
     public ResponseEntity<String> delete(
             @PathVariable UUID id
     ) {
