@@ -2,6 +2,7 @@ package com.phsousa.smart_price_api.service.impl;
 
 import com.phsousa.smart_price_api.dto.request.ProductPriceRequestDTO;
 import com.phsousa.smart_price_api.dto.response.ProductPriceResponseDTO;
+import com.phsousa.smart_price_api.dto.response.ProductPriceStatsResponseDTO;
 import com.phsousa.smart_price_api.entity.*;
 import com.phsousa.smart_price_api.exception.ResourceNotFoundException;
 import com.phsousa.smart_price_api.mapper.ProductPriceMapper;
@@ -12,8 +13,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -160,5 +163,38 @@ public class ProductPriceServiceImpl implements ProductPriceService {
                 priceAlertRepository.save(alert);
             }
         }
+    }
+
+    @Override
+    public ProductPriceStatsResponseDTO getStats(UUID productId) {
+
+        BigDecimal lowest =
+                productPriceRepository
+                        .findFirstByProductIdOrderByPriceAsc(productId)
+                        .map(ProductPrice::getPrice)
+                        .orElse(BigDecimal.ZERO);
+
+        BigDecimal highest =
+                productPriceRepository
+                        .findFirstByProductIdOrderByPriceDesc(productId)
+                        .map(ProductPrice::getPrice)
+                        .orElse(BigDecimal.ZERO);
+
+        BigDecimal average =
+                Optional.ofNullable(
+                        productPriceRepository
+                                .findAveragePriceByProductId(productId)
+                ).orElse(BigDecimal.ZERO);
+
+        long storesCount =
+                productPriceRepository
+                        .countDistinctStoreByProductId(productId);
+
+        return new ProductPriceStatsResponseDTO(
+                lowest,
+                highest,
+                average,
+                storesCount
+        );
     }
 }

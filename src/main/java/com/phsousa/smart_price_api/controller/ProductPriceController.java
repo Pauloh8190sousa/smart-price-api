@@ -2,6 +2,7 @@ package com.phsousa.smart_price_api.controller;
 
 import com.phsousa.smart_price_api.dto.request.ProductPriceRequestDTO;
 import com.phsousa.smart_price_api.dto.response.ProductPriceResponseDTO;
+import com.phsousa.smart_price_api.dto.response.ProductPriceStatsResponseDTO;
 import com.phsousa.smart_price_api.service.ProductPriceService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -63,6 +64,18 @@ public class ProductPriceController {
 
         return ResponseEntity.ok(
                 productPriceService.findByStore(storeId)
+        );
+    }
+
+
+    @GetMapping("/product/{productId}/stats")
+    @PreAuthorize("hasAuthority('PRODUCT_READ') and hasAuthority('STORE_READ')")
+    public ResponseEntity<ProductPriceStatsResponseDTO> stats(
+            @PathVariable UUID productId
+    ) {
+
+        return ResponseEntity.ok(
+                productPriceService.getStats(productId)
         );
     }
 }
