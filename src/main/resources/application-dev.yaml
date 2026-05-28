@@ -14,10 +14,23 @@ spring:
       hibernate:
         format_sql: true
 
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+
+info:
+  app:
+    name: Smart Price API
+    version: 1.0.0
+    description: API para monitoramento e comparação de preços
+
 logging:
   level:
     org.hibernate.SQL: DEBUG
-    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
 
 jwt:
   secret: PAyuZTfRVkW08535niRZiWheMTlUu4+SvNRKgS54Eu8=
