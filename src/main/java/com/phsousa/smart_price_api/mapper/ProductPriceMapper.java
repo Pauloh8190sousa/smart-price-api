@@ -39,7 +39,8 @@ public class ProductPriceMapper {
                 entity.getProduct().getName(),
 
                 entity.getStore().getId(),
-                entity.getStore().getName()
+                entity.getStore().getName(),
+                entity.getProduct().getSlug()
         );
     }
 }

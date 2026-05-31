@@ -30,6 +30,8 @@ public record ProductPriceResponseDTO(
 
         UUID storeId,
 
-        String storeName
+        String storeName,
+
+        String productSlug
 
 ) {}
