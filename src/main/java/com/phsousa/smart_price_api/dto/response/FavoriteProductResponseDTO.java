@@ -29,6 +29,6 @@ public record FavoriteProductResponseDTO(
                 description = "Nome do produto",
                 example = "iPhone 15 Pro"
         )
-        String productName
+        String productSlug
 ) {
 }

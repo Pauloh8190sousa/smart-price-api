@@ -1,6 +1,7 @@
 package com.phsousa.smart_price_api.service.impl;
 
 import com.phsousa.smart_price_api.dto.request.FavoriteProductRequestDTO;
+import com.phsousa.smart_price_api.dto.response.FavoriteCheckResponseDTO;
 import com.phsousa.smart_price_api.dto.response.FavoriteProductResponseDTO;
 import com.phsousa.smart_price_api.entity.FavoriteProduct;
 import com.phsousa.smart_price_api.entity.Product;
@@ -90,5 +91,29 @@ public class FavoriteProductServiceImpl
                 );
 
         repository.delete(favorite);
+    }
+
+
+
+    @Override
+    public FavoriteCheckResponseDTO check(
+            UUID userId,
+            UUID productId
+    ) {
+
+        return repository
+                .findByUserIdAndProductId(userId, productId)
+                .map(favorite ->
+                        new FavoriteCheckResponseDTO(
+                                true,
+                                favorite.getId()
+                        )
+                )
+                .orElse(
+                        new FavoriteCheckResponseDTO(
+                                false,
+                                null
+                        )
+                );
     }
 }

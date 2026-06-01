@@ -1,6 +1,7 @@
 package com.phsousa.smart_price_api.controller;
 
 import com.phsousa.smart_price_api.dto.request.FavoriteProductRequestDTO;
+import com.phsousa.smart_price_api.dto.response.FavoriteCheckResponseDTO;
 import com.phsousa.smart_price_api.dto.response.FavoriteProductResponseDTO;
 import com.phsousa.smart_price_api.service.FavoriteProductService;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -57,6 +58,18 @@ public class FavoriteProductController {
 
         return ResponseEntity.ok(
                 "Favorito removido com sucesso"
+        );
+    }
+
+    @GetMapping("/check")
+    @PreAuthorize("hasAuthority('PRODUCT_READ')")
+    public ResponseEntity<FavoriteCheckResponseDTO> check(
+            @RequestParam UUID userId,
+            @RequestParam UUID productId
+    ) {
+
+        return ResponseEntity.ok(
+                service.check(userId, productId)
         );
     }
 }

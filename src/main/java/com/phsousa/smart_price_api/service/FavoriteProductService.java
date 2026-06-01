@@ -1,6 +1,7 @@
 package com.phsousa.smart_price_api.service;
 
 import com.phsousa.smart_price_api.dto.request.FavoriteProductRequestDTO;
+import com.phsousa.smart_price_api.dto.response.FavoriteCheckResponseDTO;
 import com.phsousa.smart_price_api.dto.response.FavoriteProductResponseDTO;
 
 import java.util.List;
@@ -17,4 +18,10 @@ public interface FavoriteProductService {
     );
 
     void delete(UUID id);
+
+
+    FavoriteCheckResponseDTO check(
+            UUID userId,
+            UUID productId
+    );
 }

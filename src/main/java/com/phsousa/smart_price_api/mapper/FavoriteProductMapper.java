@@ -13,7 +13,7 @@ public class FavoriteProductMapper {
                 entity.getId(),
                 entity.getUser().getId(),
                 entity.getProduct().getId(),
-                entity.getProduct().getName()
+                entity.getProduct().getSlug()
         );
     }
 }
