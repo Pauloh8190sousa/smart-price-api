@@ -11,6 +11,7 @@ import com.phsousa.smart_price_api.entity.Role;
 import com.phsousa.smart_price_api.entity.User;
 import com.phsousa.smart_price_api.repository.RoleRepository;
 import com.phsousa.smart_price_api.repository.UserRepository;
+import com.phsousa.smart_price_api.service.EmailService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -29,6 +30,7 @@ public class AuthenticationService {
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
     private final RoleRepository  roleRepository;
+    private final EmailService emailService;
 
     public UserResponseDTO register(RegisterRequestDTO request) {
 
@@ -44,6 +46,8 @@ public class AuthenticationService {
                 .build();
 
         User savedUser = userRepository.save(user);
+
+        emailService.sendWelcomeEmail(savedUser.getEmail(), savedUser.getName());
 
         return new UserResponseDTO(
                 savedUser.getId(),

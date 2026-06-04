@@ -7,6 +7,7 @@ import com.phsousa.smart_price_api.entity.*;
 import com.phsousa.smart_price_api.exception.ResourceNotFoundException;
 import com.phsousa.smart_price_api.mapper.ProductPriceMapper;
 import com.phsousa.smart_price_api.repository.*;
+import com.phsousa.smart_price_api.service.EmailService;
 import com.phsousa.smart_price_api.service.ProductPriceService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,6 +30,7 @@ public class ProductPriceServiceImpl implements ProductPriceService {
     private final StoreRepository storeRepository;
     private final PriceHistoryRepository priceHistoryRepository;
     private final PriceAlertRepository priceAlertRepository;
+    private final EmailService emailService;
 
     @Override
     @Transactional
@@ -144,18 +146,11 @@ public class ProductPriceServiceImpl implements ProductPriceService {
 
             if (reachedTarget) {
 
-                log.info("""
-                        PRICE ALERT TRIGGERED
-                        
-                        Product: {}
-                        Current Price: {}
-                        Target Price: {}
-                        User: {}
-                        """,
+                emailService.sendPriceAlert(
+                        alert.getUser().getEmail(),
                         productPrice.getProduct().getName(),
                         productPrice.getPrice(),
-                        alert.getTargetPrice(),
-                        alert.getUser().getEmail()
+                        alert.getTargetPrice()
                 );
 
                 alert.setActive(false);
