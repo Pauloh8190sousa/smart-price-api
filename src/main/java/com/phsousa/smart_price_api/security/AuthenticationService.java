@@ -9,6 +9,8 @@ import com.phsousa.smart_price_api.dto.response.RoleResponseDTO;
 import com.phsousa.smart_price_api.dto.response.UserResponseDTO;
 import com.phsousa.smart_price_api.entity.Role;
 import com.phsousa.smart_price_api.entity.User;
+import com.phsousa.smart_price_api.exception.EmailAlreadyExistsException;
+import com.phsousa.smart_price_api.exception.ResourceNotFoundException;
 import com.phsousa.smart_price_api.repository.RoleRepository;
 import com.phsousa.smart_price_api.repository.UserRepository;
 import com.phsousa.smart_price_api.service.EmailService;
@@ -34,12 +36,20 @@ public class AuthenticationService {
 
     public UserResponseDTO register(RegisterRequestDTO request) {
 
+        String email = request.getEmail().trim().toLowerCase();
+
+        if (userRepository.existsByEmail(email)) {
+            throw new EmailAlreadyExistsException(email);
+        }
+
         Role role = roleRepository.findByNameWithPermissions("ROLE_USER")
-                .orElseThrow();
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Role ROLE_USER não encontrada")
+                );
 
         User user = User.builder()
-                .name(request.getName())
-                .email(request.getEmail())
+                .name(request.getName().trim())
+                .email(email)
                 .password(passwordEncoder.encode(request.getPassword()))
                 .roles(Set.of(role))
                 .active(true)
@@ -47,7 +57,10 @@ public class AuthenticationService {
 
         User savedUser = userRepository.save(user);
 
-        emailService.sendWelcomeEmail(savedUser.getEmail(), savedUser.getName());
+        emailService.sendWelcomeEmail(
+                savedUser.getEmail(),
+                savedUser.getName()
+        );
 
         return new UserResponseDTO(
                 savedUser.getId(),
@@ -58,16 +71,21 @@ public class AuthenticationService {
 
     public AuthResponseDTO login(LoginRequestDTO request) {
 
+        String email = request.getEmail().trim().toLowerCase();
+
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
-                        request.getEmail(),
+                        email,
                         request.getPassword()
                 )
         );
 
-        User user = userRepository.findByEmailWithRolesAndPermissions(
-                request.getEmail()
-        ).orElseThrow();
+        User user = userRepository.findByEmailWithRolesAndPermissions(email)
+                .orElseThrow(() ->
+                        new IllegalStateException(
+                                "Inconsistência na autenticação"
+                        )
+                );
 
         String token = jwtService.generateToken(user);
 
