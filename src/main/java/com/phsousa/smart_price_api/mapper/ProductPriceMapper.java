@@ -40,7 +40,8 @@ public class ProductPriceMapper {
 
                 entity.getStore().getId(),
                 entity.getStore().getName(),
-                entity.getProduct().getSlug()
+                entity.getProduct().getSlug(),
+                entity.getStore().getLogoUrl()
         );
     }
 }

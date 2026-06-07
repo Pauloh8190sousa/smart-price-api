@@ -32,6 +32,8 @@ public record ProductPriceResponseDTO(
 
         String storeName,
 
-        String productSlug
+        String productSlug,
+
+        String storeLogoUrl
 
 ) {}
