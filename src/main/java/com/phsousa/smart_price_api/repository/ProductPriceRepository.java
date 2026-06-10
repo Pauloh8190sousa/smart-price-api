@@ -11,7 +11,7 @@ import java.util.UUID;
 
 public interface ProductPriceRepository extends JpaRepository<ProductPrice, UUID> {
 
-    List<ProductPrice> findByProductId(UUID productId);
+    List<ProductPrice> findByProductIdOrderByPriceAsc(UUID productId);
 
     List<ProductPrice> findByStoreId(UUID storeId);
 

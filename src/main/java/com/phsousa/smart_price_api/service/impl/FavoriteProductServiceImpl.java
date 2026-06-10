@@ -6,6 +6,7 @@ import com.phsousa.smart_price_api.dto.response.FavoriteProductResponseDTO;
 import com.phsousa.smart_price_api.entity.FavoriteProduct;
 import com.phsousa.smart_price_api.entity.Product;
 import com.phsousa.smart_price_api.entity.User;
+import com.phsousa.smart_price_api.exception.BusinessException;
 import com.phsousa.smart_price_api.exception.ResourceNotFoundException;
 import com.phsousa.smart_price_api.mapper.FavoriteProductMapper;
 import com.phsousa.smart_price_api.repository.FavoriteProductRepository;
@@ -53,7 +54,7 @@ public class FavoriteProductServiceImpl
                 dto.getUserId(),
                 dto.getProductId()
         ).ifPresent(favorite -> {
-            throw new IllegalArgumentException(
+            throw new BusinessException(
                     "Produto já favoritado"
             );
         });

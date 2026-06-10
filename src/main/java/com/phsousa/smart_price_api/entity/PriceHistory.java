@@ -21,6 +21,7 @@ public class PriceHistory {
     private UUID id;
     private BigDecimal oldPrice;
     private BigDecimal newPrice;
+    @Column(nullable = false)
     private LocalDateTime changedAt;
 
     @ManyToOne

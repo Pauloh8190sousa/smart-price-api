@@ -119,7 +119,7 @@ public class ProductPriceServiceImpl implements ProductPriceService {
     findByProduct(UUID productId) {
 
         return productPriceRepository
-                .findByProductId(productId)
+                .findByProductIdOrderByPriceAsc(productId)
                 .stream()
                 .map(ProductPriceMapper::toDTO)
                 .toList();
