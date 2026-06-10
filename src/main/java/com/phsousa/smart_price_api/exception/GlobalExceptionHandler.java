@@ -162,6 +162,25 @@ public class GlobalExceptionHandler {
                 .body(error);
     }
 
+    @ExceptionHandler(BusinessException.class)
+    public ResponseEntity<StandardError> handleBusinessException(
+            BusinessException ex,
+            HttpServletRequest request
+    ) {
+
+        StandardError error = StandardError.builder()
+                .timestamp(LocalDateTime.now())
+                .status(HttpStatus.BAD_REQUEST.value())
+                .error(HttpStatus.BAD_REQUEST.getReasonPhrase())
+                .message(ex.getMessage())
+                .path(request.getRequestURI())
+                .build();
+
+        return ResponseEntity
+                .badRequest()
+                .body(error);
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<StandardError> handleGeneric(
             Exception ex,

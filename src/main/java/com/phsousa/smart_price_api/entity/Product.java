@@ -25,10 +25,13 @@ public class Product {
     @Column(unique = true, nullable = false)
     private String slug;
 
+    @Column(nullable = false)
     private String brand;
 
+    @Column(nullable = false)
     private String model;
 
+    @Column(nullable = false)
     private String category;
 
     private String imageUrl;

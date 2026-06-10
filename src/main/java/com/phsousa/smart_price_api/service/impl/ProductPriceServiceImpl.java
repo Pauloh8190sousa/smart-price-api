@@ -4,6 +4,7 @@ import com.phsousa.smart_price_api.dto.request.ProductPriceRequestDTO;
 import com.phsousa.smart_price_api.dto.response.ProductPriceResponseDTO;
 import com.phsousa.smart_price_api.dto.response.ProductPriceStatsResponseDTO;
 import com.phsousa.smart_price_api.entity.*;
+import com.phsousa.smart_price_api.exception.BusinessException;
 import com.phsousa.smart_price_api.exception.ResourceNotFoundException;
 import com.phsousa.smart_price_api.mapper.ProductPriceMapper;
 import com.phsousa.smart_price_api.repository.*;
@@ -17,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -46,6 +48,12 @@ public class ProductPriceServiceImpl implements ProductPriceService {
                         )
                 );
 
+        if (!product.getActive()) {
+            throw new BusinessException(
+                    "Produto está inativo"
+            );
+        }
+
         Store store = storeRepository
                 .findById(dto.getStoreId())
                 .orElseThrow(() ->
@@ -53,6 +61,15 @@ public class ProductPriceServiceImpl implements ProductPriceService {
                                 "Loja não encontrada"
                         )
                 );
+
+        if (!store.getActive()) {
+            throw new BusinessException(
+                    "Loja está inativa"
+            );
+        }
+
+
+        validateProductPriceDTO(dto);
 
         ProductPrice entity =
                 ProductPriceMapper.toEntity(dto);
@@ -67,6 +84,12 @@ public class ProductPriceServiceImpl implements ProductPriceService {
                         dto.getStoreId()
                 )
                 .orElse(null);
+
+
+        if (lastPrice != null && isDuplicatePrice(lastPrice, dto)) {
+            return ProductPriceMapper.toDTO(lastPrice);
+        }
+
 
         // cria histórico se preço mudou
         if (lastPrice != null &&
@@ -132,6 +155,10 @@ public class ProductPriceServiceImpl implements ProductPriceService {
 
     private void processPriceAlerts(ProductPrice productPrice) {
 
+        if (!productPrice.getAvailable()) {
+            return;
+        }
+
         List<PriceAlert> alerts =
                 priceAlertRepository
                         .findByProductIdAndActiveTrue(
@@ -145,6 +172,10 @@ public class ProductPriceServiceImpl implements ProductPriceService {
                             .compareTo(alert.getTargetPrice()) <= 0;
 
             if (reachedTarget) {
+
+                if (alert.getUser().getEmail() == null || alert.getUser().getEmail().isBlank()) {
+                    continue;
+                }
 
                 emailService.sendPriceAlert(
                         alert.getUser().getEmail(),
@@ -191,5 +222,148 @@ public class ProductPriceServiceImpl implements ProductPriceService {
                 average,
                 storesCount
         );
+    }
+
+    private void validateProductPriceDTO(ProductPriceRequestDTO dto) {
+
+        boolean hasQuantity =
+                dto.getInstallmentQuantity() != null;
+
+        boolean hasValue =
+                dto.getInstallmentValue() != null;
+
+        if (hasQuantity != hasValue) {
+            throw new BusinessException(
+                    "Parcelamento inválido"
+            );
+        }
+
+        if (dto.getInstallmentQuantity() != null
+                && dto.getInstallmentQuantity() <= 0) {
+
+            throw new BusinessException(
+                    "Quantidade de parcelas inválida"
+            );
+        }
+
+        if (dto.getInstallmentValue() != null
+                && dto.getInstallmentValue().compareTo(BigDecimal.ZERO) <= 0) {
+
+            throw new BusinessException(
+                    "Valor da parcela inválido"
+            );
+        }
+
+
+        if (
+                dto.getInstallmentQuantity() != null
+        ) {
+
+            BigDecimal totalInstallments =
+                    dto.getInstallmentValue()
+                            .multiply(
+                                    BigDecimal.valueOf(
+                                            dto.getInstallmentQuantity()
+                                    )
+                            );
+
+            if (
+                    totalInstallments.compareTo(
+                            dto.getPrice().multiply(
+                                    BigDecimal.valueOf(1.5)
+                            )
+                    ) > 0
+            ) {
+
+                throw new BusinessException(
+                        "Parcelamento incompatível com o preço"
+                );
+            }
+        }
+
+
+
+        if (dto.getShippingPrice() != null
+                && dto.getShippingPrice().compareTo(BigDecimal.ZERO) < 0) {
+
+            throw new BusinessException(
+                    "Frete inválido"
+            );
+        }
+
+        if (dto.getPrice().compareTo(
+                BigDecimal.valueOf(500_000)
+        ) > 0) {
+
+            throw new BusinessException(
+                    "Preço fora do limite permitido"
+            );
+        }
+
+        if (!dto.getAvailable()
+                && dto.getInstallmentQuantity() != null) {
+
+            throw new BusinessException(
+                    "Produto indisponível não pode possuir parcelamento"
+            );
+        }
+
+        if (dto.getProductUrl().length() > 1000) {
+            throw new BusinessException(
+                    "URL excede o limite permitido"
+            );
+        }
+    }
+
+    private boolean isDuplicatePrice(ProductPrice lastPrice, ProductPriceRequestDTO dto) {
+        boolean samePrice =
+                lastPrice.getPrice().compareTo(dto.getPrice()) == 0;
+
+        boolean sameAvailability =
+                lastPrice.getAvailable().equals(dto.getAvailable());
+
+        boolean sameShipping =
+                Objects.equals(
+                        lastPrice.getShippingPrice(),
+                        dto.getShippingPrice()
+                );
+
+        boolean sameInstallmentQuantity =
+                Objects.equals(
+                        lastPrice.getInstallmentQuantity(),
+                        dto.getInstallmentQuantity()
+                );
+
+        boolean sameInstallmentValue =
+                Objects.equals(
+                        lastPrice.getInstallmentValue(),
+                        dto.getInstallmentValue()
+                );
+
+        boolean sameUrl =
+                Objects.equals(
+                        lastPrice.getProductUrl(),
+                        dto.getProductUrl()
+                );
+
+        boolean sameSeller =
+                Objects.equals(
+                        lastPrice.getSellerName(),
+                        dto.getSellerName()
+                );
+
+        if (
+                samePrice
+                        && sameAvailability
+                        && sameShipping
+                        && sameInstallmentQuantity
+                        && sameInstallmentValue
+                        && sameUrl
+                        && sameSeller
+        ) {
+            return true;
+        }
+
+        return false;
     }
 }

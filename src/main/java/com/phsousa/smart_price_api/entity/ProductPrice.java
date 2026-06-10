@@ -19,8 +19,13 @@ public class ProductPrice {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
+    @Column(nullable = false, precision = 12, scale = 2)
     private BigDecimal price;
+
+    @Column(nullable = false, length = 1000)
     private String productUrl;
+
+    @Column(nullable = false)
     private Boolean available;
     private String sellerName;
     private BigDecimal shippingPrice;
@@ -28,9 +33,10 @@ public class ProductPrice {
     private BigDecimal installmentValue;
     private LocalDateTime capturedAt;
 
-    @ManyToOne
+    @ManyToOne(optional = false)
     private Product product;
-    @ManyToOne
+
+    @ManyToOne(optional = false)
     private Store store;
 
 

@@ -2,6 +2,7 @@ package com.phsousa.smart_price_api.service.impl;
 
 import com.phsousa.smart_price_api.dto.response.ProductResponseDTO;
 import com.phsousa.smart_price_api.entity.Product;
+import com.phsousa.smart_price_api.exception.BusinessException;
 import com.phsousa.smart_price_api.exception.ResourceNotFoundException;
 import com.phsousa.smart_price_api.mapper.ProductMapper;
 import com.phsousa.smart_price_api.repository.ProductRepository;
@@ -22,6 +23,30 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public ProductResponseDTO create(Product product) {
+
+        product.setName(product.getName().trim());
+        product.setSlug(product.getSlug().trim().toLowerCase());
+        product.setBrand(product.getBrand().trim());
+        product.setModel(product.getModel().trim());
+        product.setCategory(product.getCategory().trim());
+
+        if (productRepository.existsBySlug(product.getSlug())) {
+            throw new BusinessException(
+                    "Já existe um produto com esse slug"
+            );
+        }
+
+        if (
+                productRepository.existsByNameIgnoreCaseAndBrandIgnoreCaseAndModelIgnoreCase(
+                        product.getName(),
+                        product.getBrand(),
+                        product.getModel()
+                )
+        ) {
+            throw new BusinessException(
+                    "Produto já cadastrado"
+            );
+        }
 
         Product entity = productRepository.save(product);
 
@@ -47,7 +72,10 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public void delete(UUID id) {
-        productRepository.deleteById(id);
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Produto não encontrado"));
+
+        productRepository.delete(product);
     }
 
     @Override
@@ -65,7 +93,31 @@ public class ProductServiceImpl implements ProductService {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Produto não encontrado"));
 
-        product.setUpdatedAt(LocalDateTime.now());
+        updated.setName(updated.getName().trim());
+        updated.setSlug(updated.getSlug().trim().toLowerCase());
+        updated.setBrand(updated.getBrand().trim());
+        updated.setModel(updated.getModel().trim());
+        updated.setCategory(updated.getCategory().trim());
+
+        if (productRepository.existsBySlugAndIdNot(updated.getSlug(), id)) {
+            throw new BusinessException(
+                    "Já existe um produto com esse slug"
+            );
+        }
+
+        if (
+                productRepository.existsByNameIgnoreCaseAndBrandIgnoreCaseAndModelIgnoreCaseAndIdNot(
+                        updated.getName(),
+                        updated.getBrand(),
+                        updated.getModel(),
+                        id
+                )
+        ) {
+            throw new BusinessException(
+                    "Produto já cadastrado"
+            );
+        }
+
         product.setActive(updated.getActive());
         product.setBrand(updated.getBrand());
         product.setCategory(updated.getCategory());

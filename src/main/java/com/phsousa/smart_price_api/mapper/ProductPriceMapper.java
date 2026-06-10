@@ -4,7 +4,9 @@ import com.phsousa.smart_price_api.dto.request.ProductPriceRequestDTO;
 import com.phsousa.smart_price_api.dto.response.ProductPriceResponseDTO;
 import com.phsousa.smart_price_api.entity.ProductPrice;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 public class ProductPriceMapper {
 
@@ -15,7 +17,8 @@ public class ProductPriceMapper {
                 .productUrl(dto.getProductUrl())
                 .available(dto.getAvailable())
                 .sellerName(dto.getSellerName())
-                .shippingPrice(dto.getShippingPrice())
+                .shippingPrice(Optional.ofNullable(dto.getShippingPrice())
+                        .orElse(BigDecimal.ZERO))
                 .installmentQuantity(dto.getInstallmentQuantity())
                 .installmentValue(dto.getInstallmentValue())
                 .capturedAt(LocalDateTime.now())
