@@ -26,9 +26,21 @@ public record FavoriteProductResponseDTO(
         UUID productId,
 
         @Schema(
+                description = "Slug do produto",
+                example = "iphone-15-pro"
+        )
+        String productSlug,
+
+        @Schema(
+                description = "Url da imagem do produto",
+                example = "https://cdn.smartprice.com/products/iphone15pro.jpg"
+        )
+        String productImageUrl,
+
+        @Schema(
                 description = "Nome do produto",
                 example = "iPhone 15 Pro"
         )
-        String productSlug
+        String productName
 ) {
 }

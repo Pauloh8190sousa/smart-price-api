@@ -13,7 +13,9 @@ public class FavoriteProductMapper {
                 entity.getId(),
                 entity.getUser().getId(),
                 entity.getProduct().getId(),
-                entity.getProduct().getSlug()
+                entity.getProduct().getSlug(),
+                entity.getProduct().getImageUrl(),
+                entity.getProduct().getName()
         );
     }
 }
