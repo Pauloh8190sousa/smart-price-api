@@ -109,6 +109,19 @@ public class ProductPriceServiceImpl implements ProductPriceService {
         ProductPrice saved =
                 productPriceRepository.save(entity);
 
+        if (lastPrice == null) {
+
+            PriceHistory history = PriceHistory.builder()
+                    .oldPrice(dto.getPrice())
+                    .newPrice(dto.getPrice())
+                    .changedAt(LocalDateTime.now())
+                    .product(product)
+                    .store(store)
+                    .build();
+
+            priceHistoryRepository.save(history);
+        }
+
         processPriceAlerts(saved);
 
         return ProductPriceMapper.toDTO(saved);
